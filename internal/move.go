@@ -50,7 +50,7 @@ func Move(paths []string, recursive, force, verbose bool) error {
 		})
 
 		if verbose {
-			log.Info("trashed %s", p)
+			log.Info("trashed file", "file", p)
 		}
 	}
 
