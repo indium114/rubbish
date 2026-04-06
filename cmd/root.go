@@ -14,6 +14,7 @@ var (
 	flagRecursive bool
 	flagForce     bool
 	flagVerbose   bool
+	flagPermanent bool
 
 	flagList    bool
 	flagRestore string
@@ -26,7 +27,6 @@ var rootCmd = &cobra.Command{
 	Short: "A CLI file trash tool. A replacement for rm",
 	Args:  cobra.ArbitraryArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
-
 		switch {
 		case flagList:
 			return internal.List()
@@ -44,7 +44,7 @@ var rootCmd = &cobra.Command{
 			if len(args) == 0 {
 				return fmt.Errorf("no files provided")
 			}
-			return internal.Move(args, flagRecursive, flagForce, flagVerbose)
+			return internal.Move(args, flagRecursive, flagForce, flagVerbose, flagPermanent)
 		}
 	},
 }
@@ -60,6 +60,7 @@ func init() {
 	rootCmd.Flags().BoolVarP(&flagRecursive, "recursive", "r", false, "recursive")
 	rootCmd.Flags().BoolVarP(&flagForce, "force", "f", false, "force")
 	rootCmd.Flags().BoolVarP(&flagVerbose, "verbose", "v", false, "verbose")
+	rootCmd.Flags().BoolVarP(&flagPermanent, "permanent", "p", false, "permanent")
 
 	rootCmd.Flags().BoolVar(&flagList, "list", false, "list rubbish")
 	rootCmd.Flags().StringVar(&flagRestore, "restore", "", "restore by id")
