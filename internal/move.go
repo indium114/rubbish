@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func Move(paths []string, recursive, force, verbose bool) error {
+func Move(paths []string, recursive, force, verbose, permanent bool) error {
 	err := EnsureDirs()
 	if err != nil {
 		return err
@@ -27,6 +27,21 @@ func Move(paths []string, recursive, force, verbose bool) error {
 
 		if info.IsDir() && !recursive {
 			return fmt.Errorf("can't trash %s: is a directory. Try with -r", p)
+		}
+
+		if permanent {
+			if recursive {
+				err := os.RemoveAll(p)
+				if err != nil {
+					return err
+				}
+			} else {
+				err := os.Remove(p)
+				if err != nil {
+					return err
+				}
+			}
+			return nil
 		}
 
 		id := fmt.Sprintf("%d", time.Now().UnixNano())
