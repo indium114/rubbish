@@ -25,7 +25,7 @@
 
         packages.rubbish = pkgs.buildGoModule {
           pname = "rubbish";
-          version = "2026.03.01-a";
+          version = "2026.04.06-a";
 
           src = self;
 
