@@ -41,6 +41,7 @@ func Move(paths []string, recursive, force, verbose, permanent bool) error {
 					return err
 				}
 			}
+			return nil
 		}
 
 		id := fmt.Sprintf("%d", time.Now().UnixNano())
