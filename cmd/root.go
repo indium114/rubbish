@@ -42,7 +42,7 @@ var rootCmd = &cobra.Command{
 
 		default:
 			if len(args) == 0 {
-				return fmt.Errorf("no files provided")
+				return fmt.Errorf("No files provided")
 			}
 			return internal.Move(args, flagRecursive, flagForce, flagVerbose, flagPermanent)
 		}

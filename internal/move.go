@@ -26,7 +26,7 @@ func Move(paths []string, recursive, force, verbose, permanent bool) error {
 		}
 
 		if info.IsDir() && !recursive {
-			return fmt.Errorf("can't trash %s: is a directory. Try with -r", p)
+			return fmt.Errorf("Can't trash %s: is a directory. Try with -r", p)
 		}
 
 		if permanent {
@@ -65,7 +65,7 @@ func Move(paths []string, recursive, force, verbose, permanent bool) error {
 		})
 
 		if verbose {
-			log.Info("trashed file", "file", p)
+			log.Info("Trashed file", "file", p)
 		}
 	}
 
