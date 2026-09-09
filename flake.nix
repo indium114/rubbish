@@ -1,49 +1,51 @@
 {
-  description = "rubbish devshell and package";
+  description = "rust devshell and package, created by scaffolder";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
+    naersk = {
+      url = "github:nix-community/naersk";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, flake-utils }:
-    flake-utils.lib.eachDefaultSystem (system:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      flake-utils,
+      naersk,
+    }:
+    flake-utils.lib.eachDefaultSystem (
+      system:
       let
         pkgs = import nixpkgs { inherit system; };
-      in {
+
+        naersk' = pkgs.callPackage naersk { };
+      in
+      {
         devShells.default = pkgs.mkShell {
-          name = "rubbish-devshell";
+          name = "rust-devshell";
 
           packages = with pkgs; [
-            go
-            gopls
-            gotools
-            delve
-            just
+            cargo
+            rustc
+            rustfmt
+            rust-analyzer
+            clippy
+            pkg-config
           ];
         };
 
-        packages.rubbish = pkgs.buildGoModule {
-          pname = "rubbish";
-          version = "2026.04.28-a";
-
-          src = self;
-
-          vendorHash = "sha256-TziD3Mq0e/+zeiRW/X3wOt/91V8sQsYhSFHf8qj0gmU=";
-
-          subPackages = [ "." ];
-          ldflags = [ "-s" "-w" ];
-
-          meta = with pkgs.lib; {
-            description = "A CLI file trash tool, a replacement for rm";
-            license = licenses.mit;
-            platforms = platforms.all;
-          };
+        packages.rubbish = naersk'.buildPackage {
+          src = ./.;
         };
 
         apps.rubbish = {
           type = "app";
-          program = "${self.packages.${system}.rubbish}/bin/rubbish";
+          program = "${self.packages.${pkgs.stdenv.hostPlatform.system}.rubbish}/bin/rubbish";
         };
-      });
+      }
+    );
 }
