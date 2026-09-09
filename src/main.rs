@@ -1,5 +1,7 @@
 use clap::Parser;
-use std::{path::PathBuf, process};
+use std::process;
+
+mod trash;
 
 static VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -13,9 +15,6 @@ struct Cli {
 
     #[arg(short = 'f', long = "force")]
     force: bool,
-
-    #[arg(short = 'v', long = "verbose")]
-    verbose: bool,
 
     #[arg(short = 'p', long = "permanent")]
     permanent: bool,
@@ -36,7 +35,7 @@ struct Cli {
     files: Vec<String>,
 }
 
-fn main() {
+fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
     let _ = if cli.list {
@@ -51,14 +50,15 @@ fn main() {
         eprintln!("No files provided");
         process::exit(1);
     } else {
-        todo!(
-            /*
-            &cli.files,
-            cli.recursive,
-            cli.force,
-            cli.verbose,
-            cli.permanent,
-            */
-        )
+        for file in &cli.files {
+            crate::trash::trash(
+                &file,
+                cli.recursive,
+                cli.force,
+                cli.permanent
+            )?
+        }
     };
+
+    Ok(())
 }
