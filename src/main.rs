@@ -60,7 +60,7 @@ fn main() -> anyhow::Result<()> {
                 "{spinner:.green} {msg} [{elapsed_precise}] [{wide_bar:.white}] ({eta})",
             )
             .unwrap()
-            .progress_chars("#>-"));
+            .progress_chars("██░"));
             pb.set_message(file.clone());
             pb.enable_steady_tick(Duration::from_millis(120));
 
