@@ -1,0 +1,51 @@
+[
+  {
+    "name": "Check if the file exists before attempting to delete it",
+    "prio": 3,
+    "state": 0,
+    "id": 0,
+    "project": "main"
+  },
+  {
+    "name": "force flag",
+    "prio": 1,
+    "state": 0,
+    "id": 1,
+    "project": "cli"
+  },
+  {
+    "name": "list command",
+    "prio": 1,
+    "state": 0,
+    "id": 2,
+    "project": "cli"
+  },
+  {
+    "name": "clear command",
+    "prio": 1,
+    "state": 0,
+    "id": 3,
+    "project": "cli"
+  },
+  {
+    "name": "delete command",
+    "prio": 1,
+    "state": 0,
+    "id": 4,
+    "project": "cli"
+  },
+  {
+    "name": "restore command",
+    "prio": 1,
+    "state": 0,
+    "id": 5,
+    "project": "cli"
+  },
+  {
+    "name": "implement",
+    "prio": 3,
+    "state": 0,
+    "id": 6,
+    "project": "metadata"
+  }
+]
