@@ -1,3 +1,4 @@
+use anyhow::bail;
 use lz4_flex::frame::FrameEncoder;
 use std::{
     fs::{self, File},
@@ -7,13 +8,6 @@ use std::{
 };
 use tar::Builder;
 use indicatif::ProgressBar;
-
-fn rubbish_path() -> String {
-    let home = dirs::home_dir()
-        .map(|p| p.to_string_lossy().into_owned())
-        .unwrap_or_default();
-    home + "/.rubbish"
-}
 
 fn dir_size(path: &str) -> u64 {
     let p = Path::new(path);
@@ -62,6 +56,10 @@ pub fn trash(file: &str, recursive: bool, force: bool, permanent: bool, pb: &Pro
             false => fs::remove_file(file)?,
         },
         false => {
+            let path = Path::new(file.clone());
+            if path.is_dir() && !recursive {
+                bail!("tried to trash a directory without recursive flag");
+            }
             let id = SystemTime::now()
                 .duration_since(UNIX_EPOCH)
                 .expect("You've done it. You've achieved time-travel")
@@ -72,7 +70,7 @@ pub fn trash(file: &str, recursive: bool, force: bool, permanent: bool, pb: &Pro
                     .file_name()
                     .and_then(|o| o.to_str())
                     .unwrap();
-            let path = rubbish_path() + "/files/" + &store_name;
+            let path = crate::models::rubbish_path() + "/files/" + &store_name;
 
             match compress(file, &path, pb) {
                 Ok(_) => (),

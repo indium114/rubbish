@@ -3,6 +3,7 @@ use indicatif::{MultiProgress, ProgressStyle, ProgressBar, ProgressState};
 use rayon::prelude::*;
 use std::{fs, process, path::Path, io::Write, time::Duration};
 
+mod models;
 mod trash;
 
 static VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -64,8 +65,10 @@ fn main() -> anyhow::Result<()> {
             pb.set_message(file.clone());
             pb.enable_steady_tick(Duration::from_millis(120));
 
-            let _ = crate::trash::trash(&file, cli.recursive, cli.force, cli.permanent, &pb);
-            pb.finish_with_message(format!("{} <done>", file.clone()));
+            match crate::trash::trash(&file, cli.recursive, cli.force, cli.permanent, &pb) {
+                Ok(_) => pb.finish_with_message(format!("{} <done>", file.clone())),
+                Err(e) => pb.finish_with_message(e.to_string()),
+            };
         });
     };
 
