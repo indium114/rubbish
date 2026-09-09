@@ -1,14 +1,12 @@
+use lz4_flex::frame::FrameEncoder;
 use std::{
     fs::{self, File},
-    path::Path,
     io::BufWriter,
-    time::{
-        SystemTime,
-        UNIX_EPOCH
-    },
+    path::Path,
+    time::{SystemTime, UNIX_EPOCH},
 };
 use tar::Builder;
-use lz4_flex::frame::FrameEncoder;
+use indicatif::ProgressBar;
 
 fn rubbish_path() -> String {
     let home = dirs::home_dir()
@@ -17,18 +15,36 @@ fn rubbish_path() -> String {
     home + "/.rubbish"
 }
 
-fn compress(src: &str, dest: &str) -> anyhow::Result<()> {
+fn dir_size(path: &str) -> u64 {
+    let p = Path::new(path);
+    if p.is_file() {
+        return fs::metadata(path).map(|m| m.len()).unwrap_or(0);
+    }
+    fs::read_dir(p)
+        .ok()
+        .map(|d| {
+            d.filter_map(|e| e.ok())
+                .map(|e| dir_size(&e.path().to_string_lossy()))
+                .sum()
+        })
+        .unwrap_or(0)
+}
+
+fn compress(src: &str, dest: &str, pb: &ProgressBar) -> anyhow::Result<()> {
+    pb.set_length(dir_size(src.clone()));
     let output = File::create(dest)?;
     let bufwrite = BufWriter::new(output);
+    let tracked = pb.wrap_write(bufwrite);
 
-    let lz4_encoder = FrameEncoder::new(bufwrite);
+    let lz4_encoder = FrameEncoder::new(tracked);
     let mut tar_builder = Builder::new(lz4_encoder);
 
     let path = Path::new(src.clone());
     if path.is_dir() {
         tar_builder.append_dir_all(".", src)?;
     } else if path.is_file() {
-        tar_builder.append_path_with_name(src, path.file_name().and_then(|o| o.to_str()).unwrap())?;
+        tar_builder
+            .append_path_with_name(src, path.file_name().and_then(|o| o.to_str()).unwrap())?;
     } else {
         return Ok(()); // file is a special file
     }
@@ -39,7 +55,7 @@ fn compress(src: &str, dest: &str) -> anyhow::Result<()> {
     Ok(())
 }
 
-pub fn trash(file: &str, recursive: bool, force: bool, permanent: bool) -> anyhow::Result<()> {
+pub fn trash(file: &str, recursive: bool, force: bool, permanent: bool, pb: &ProgressBar) -> anyhow::Result<()> {
     match permanent {
         true => match recursive {
             true => fs::remove_dir_all(file)?,
@@ -50,17 +66,21 @@ pub fn trash(file: &str, recursive: bool, force: bool, permanent: bool) -> anyho
                 .duration_since(UNIX_EPOCH)
                 .expect("You've done it. You've achieved time-travel")
                 .as_nanos();
-            let store_name = id.to_string() + "_" + Path::new(file.clone()).file_name().and_then(|o| o.to_str()).unwrap();
+            let store_name = id.to_string()
+                + "_"
+                + Path::new(file.clone())
+                    .file_name()
+                    .and_then(|o| o.to_str())
+                    .unwrap();
             let path = rubbish_path() + "/files/" + &store_name;
 
-            match compress(file, &path) {
+            match compress(file, &path, pb) {
                 Ok(_) => (),
                 Err(e) => match force {
                     true => (),
                     false => return Err(e),
-                }
+                },
             };
-            println!("Compressed the {} to {}", file.clone(), path.clone())
         }
     }
 
