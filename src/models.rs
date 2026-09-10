@@ -6,6 +6,7 @@ use tabled::Tabled;
 pub struct Entry {
     pub id: String,
     pub original_path: String,
+    #[tabled(skip)]
     pub stored_name: String,
     pub deleted_at: u128,
     pub is_dir: bool,
