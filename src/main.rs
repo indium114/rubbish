@@ -40,6 +40,8 @@ struct Cli {
 }
 
 fn main() -> anyhow::Result<()> {
+    fs::create_dir_all(crate::models::rubbish_path() + "/files")?;
+
     let cli = Cli::parse();
 
     let mp = MultiProgress::new();
