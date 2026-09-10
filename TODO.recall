@@ -37,7 +37,7 @@
   {
     "name": "restore command",
     "prio": 1,
-    "state": 0,
+    "state": 2,
     "id": 5,
     "project": "cli"
   },

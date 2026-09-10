@@ -13,7 +13,7 @@ use tokio::sync::Semaphore;
 
 static META_SEMAPHORE: LazyLock<Arc<Semaphore>> = LazyLock::new(|| Arc::new(Semaphore::new(1)));
 
-fn dir_size(path: &str) -> u64 {
+pub fn dir_size(path: &str) -> u64 {
     let p = Path::new(path);
     if p.is_file() {
         return fs::metadata(path).map(|m| m.len()).unwrap_or(0);

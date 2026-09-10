@@ -11,6 +11,7 @@ use std::{
 };
 use tabled::Table;
 
+mod decompress;
 mod models;
 mod clear;
 mod trash;
@@ -58,7 +59,7 @@ fn main() -> anyhow::Result<()> {
         let meta = crate::models::load_metadata();
         println!("{}", Table::new(meta).to_string());
     } else if let Some(id) = &cli.restore {
-        todo!()
+        crate::decompress::restore(id.to_string());
     } else if let Some(id) = &cli.delete {
         todo!()
     } else if cli.clear {
