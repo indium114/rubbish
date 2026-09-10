@@ -96,6 +96,10 @@ pub fn trash(
                     });
                     let _ = crate::models::save_metadata(meta);
                     drop(permit);
+                    match path1.is_dir() {
+                        true => fs::remove_dir_all(path1)?,
+                        false => fs::remove_file(path1)?,
+                    }
                 }
                 Err(e) => match force {
                     true => (),
