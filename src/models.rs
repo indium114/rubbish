@@ -6,7 +6,7 @@ pub struct Entry {
     pub id: String,
     pub original_path: String,
 	pub stored_name: String,
-	pub deleted_at: u64,
+	pub deleted_at: u128,
 	pub is_dir: bool,
 }
 

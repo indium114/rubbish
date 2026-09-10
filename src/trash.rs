@@ -4,10 +4,14 @@ use std::{
     fs::{self, File},
     io::BufWriter,
     path::Path,
+    sync::{Arc, LazyLock},
     time::{SystemTime, UNIX_EPOCH},
 };
 use tar::Builder;
 use indicatif::ProgressBar;
+use tokio::sync::Semaphore;
+
+static META_SEMAPHORE: LazyLock<Arc<Semaphore>> = LazyLock::new(|| Arc::new(Semaphore::new(1)));
 
 fn dir_size(path: &str) -> u64 {
     let p = Path::new(path);
@@ -56,8 +60,8 @@ pub fn trash(file: &str, recursive: bool, force: bool, permanent: bool, pb: &Pro
             false => fs::remove_file(file)?,
         },
         false => {
-            let path = Path::new(file.clone());
-            if path.is_dir() && !recursive {
+            let path1 = Path::new(file.clone());
+            if path1.is_dir() && !recursive {
                 bail!("tried to trash a directory without recursive flag");
             }
             let id = SystemTime::now()
@@ -73,7 +77,22 @@ pub fn trash(file: &str, recursive: bool, force: bool, permanent: bool, pb: &Pro
             let path = crate::models::rubbish_path() + "/files/" + &store_name;
 
             match compress(file, &path, pb) {
-                Ok(_) => (),
+                Ok(_) => {
+                    let rt = tokio::runtime::Runtime::new().unwrap();
+                    let permit = rt.block_on(async {
+                        META_SEMAPHORE.acquire().await.unwrap()
+                    });
+                    let mut meta = crate::models::load_metadata();
+                    meta.push(crate::models::Entry {
+                        id: id.to_string(),
+                        original_path: file.to_string(),
+                        stored_name: path,
+                        deleted_at: id,
+                        is_dir: path1.is_dir(),
+                    });
+                    let _ = crate::models::save_metadata(meta);
+                    drop(permit);
+                },
                 Err(e) => match force {
                     true => (),
                     false => return Err(e),
