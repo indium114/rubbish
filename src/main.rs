@@ -1,11 +1,8 @@
-use anyhow::bail;
 use clap::Parser;
-use indicatif::{MultiProgress, ProgressBar, ProgressState, ProgressStyle};
+use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use rayon::prelude::*;
 use std::{
     fs,
-    io::Write,
-    path::{Path, PathBuf},
     process,
     time::Duration,
 };
@@ -55,13 +52,13 @@ fn main() -> anyhow::Result<()> {
 
     let mp = MultiProgress::new();
 
-    let _ = if cli.list {
+    if cli.list {
         let meta = crate::models::load_metadata();
-        println!("{}", Table::new(meta).to_string());
+        println!("{}", Table::new(meta));
     } else if let Some(id) = &cli.restore {
-        crate::decompress::restore(id.to_string());
+        crate::decompress::restore(id.to_string())?;
     } else if let Some(id) = &cli.delete {
-        crate::clear::delete(id.to_string());
+        crate::clear::delete(id.to_string())?;
     } else if cli.clear {
         crate::clear::clear();
     } else if cli.files.is_empty() {

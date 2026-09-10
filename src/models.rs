@@ -23,7 +23,7 @@ pub fn load_metadata() -> Vec<Entry> {
     fs::read_to_string(rubbish_path() + "/metadata.json")
         .ok()
         .and_then(|s| serde_json::from_str(&s).ok())
-        .unwrap_or(Vec::new())
+        .unwrap_or_default()
 }
 
 pub fn save_metadata(data: Vec<Entry>) -> bool {

@@ -1,4 +1,4 @@
-use crate::{models::Entry, trash::dir_size};
+use crate::trash::dir_size;
 use indicatif::{ProgressBar, ProgressStyle};
 use lz4_flex::frame::FrameDecoder;
 use std::{
@@ -10,7 +10,7 @@ use std::{
 use tar::Archive;
 
 fn decompress(src: &str, dest: &str, pb: &ProgressBar, dir: bool) -> anyhow::Result<()> {
-    pb.set_length(dir_size(src.clone()));
+    pb.set_length(dir_size(src));
     pb.set_message(dest.to_string());
     let input = File::open(src)?;
     let bufread = BufReader::new(input);
