@@ -61,7 +61,7 @@ fn main() -> anyhow::Result<()> {
     } else if let Some(id) = &cli.restore {
         crate::decompress::restore(id.to_string());
     } else if let Some(id) = &cli.delete {
-        todo!()
+        crate::clear::delete(id.to_string());
     } else if cli.clear {
         crate::clear::clear();
     } else if cli.files.is_empty() {
