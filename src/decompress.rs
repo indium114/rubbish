@@ -1,4 +1,4 @@
-use crate::{trash::dir_size, models::Entry};
+use crate::{models::Entry, trash::dir_size};
 use indicatif::{ProgressBar, ProgressStyle};
 use lz4_flex::frame::FrameDecoder;
 use std::{
@@ -23,7 +23,7 @@ fn decompress(src: &str, dest: &str, pb: &ProgressBar, dir: bool) -> anyhow::Res
         true => {
             fs::create_dir_all(dest)?;
             tar_archive.unpack(dest)?;
-        },
+        }
         false => {
             let mut entries = tar_archive.entries()?;
             let mut entry = entries
@@ -49,11 +49,13 @@ pub fn restore(id: String) -> anyhow::Result<()> {
     crate::models::save_metadata(entries);
 
     let pb = ProgressBar::new(0);
-    pb.set_style(ProgressStyle::with_template(
-        "{spinner:.green} {msg} [{elapsed_precise}] [{wide_bar:.white}] ({eta})",
-    )
-    .unwrap()
-    .progress_chars("██░"));
+    pb.set_style(
+        ProgressStyle::with_template(
+            "{spinner:.green} {msg} [{elapsed_precise}] [{wide_bar:.white}] ({eta})",
+        )
+        .unwrap()
+        .progress_chars("██░"),
+    );
     pb.enable_steady_tick(Duration::from_millis(120));
 
     decompress(&found.stored_name, &found.original_path, &pb, found.is_dir)?;

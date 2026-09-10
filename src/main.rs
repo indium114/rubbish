@@ -11,9 +11,9 @@ use std::{
 };
 use tabled::Table;
 
+mod clear;
 mod decompress;
 mod models;
-mod clear;
 mod trash;
 
 static VERSION: &str = env!("CARGO_PKG_VERSION");
