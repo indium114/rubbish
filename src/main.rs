@@ -1,7 +1,8 @@
+use anyhow::bail;
 use clap::Parser;
 use indicatif::{MultiProgress, ProgressStyle, ProgressBar, ProgressState};
 use rayon::prelude::*;
-use std::{fs, process, path::Path, io::Write, time::Duration};
+use std::{fs, process, path::{Path, PathBuf}, io::Write, time::Duration};
 
 mod models;
 mod trash;
@@ -56,19 +57,28 @@ fn main() -> anyhow::Result<()> {
         process::exit(1);
     } else {
         cli.files.par_iter().for_each(|file| {
-            let pb = mp.add(ProgressBar::new(0));
-            pb.set_style(ProgressStyle::with_template(
-                "{spinner:.green} {msg} [{elapsed_precise}] [{wide_bar:.white}] ({eta})",
-            )
-            .unwrap()
-            .progress_chars("██░"));
-            pb.set_message(file.clone());
-            pb.enable_steady_tick(Duration::from_millis(120));
+            match fs::canonicalize(file) {
+                Ok(file) => {
+                    let file = file.to_str().map(|s| s.to_string()).unwrap();
+                    let pb = mp.add(ProgressBar::new(0));
+                    pb.set_style(ProgressStyle::with_template(
+                        "{spinner:.green} {msg} [{elapsed_precise}] [{wide_bar:.white}] ({eta})",
+                    )
+                    .unwrap()
+                    .progress_chars("██░"));
+                    pb.set_message(file.clone());
+                    pb.enable_steady_tick(Duration::from_millis(120));
 
-            match crate::trash::trash(&file, cli.recursive, cli.force, cli.permanent, &pb) {
-                Ok(_) => pb.finish_with_message(format!("{} <done>", file.clone())),
-                Err(e) => pb.finish_with_message(e.to_string()),
-            };
+                    match crate::trash::trash(&file, cli.recursive, cli.force, cli.permanent, &pb) {
+                        Ok(_) => pb.finish_with_message(format!("{} <done>", file.clone())),
+                        Err(e) => pb.finish_with_message(e.to_string()),
+                    };
+                },
+                Err(_) => {
+                    eprintln!("File {file} does not exist or is inaccessible");
+                    process::exit(1);
+                }
+            }
         });
     };
 

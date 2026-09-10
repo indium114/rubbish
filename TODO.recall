@@ -2,7 +2,7 @@
   {
     "name": "Check if the file exists before attempting to delete it",
     "prio": 3,
-    "state": 0,
+    "state": 2,
     "id": 0,
     "project": "main"
   },
