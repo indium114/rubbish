@@ -1,4 +1,5 @@
 use anyhow::bail;
+use indicatif::ProgressBar;
 use lz4_flex::frame::FrameEncoder;
 use std::{
     fs::{self, File},
@@ -8,7 +9,6 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 use tar::Builder;
-use indicatif::ProgressBar;
 use tokio::sync::Semaphore;
 
 static META_SEMAPHORE: LazyLock<Arc<Semaphore>> = LazyLock::new(|| Arc::new(Semaphore::new(1)));
@@ -53,7 +53,13 @@ fn compress(src: &str, dest: &str, pb: &ProgressBar) -> anyhow::Result<()> {
     Ok(())
 }
 
-pub fn trash(file: &str, recursive: bool, force: bool, permanent: bool, pb: &ProgressBar) -> anyhow::Result<()> {
+pub fn trash(
+    file: &str,
+    recursive: bool,
+    force: bool,
+    permanent: bool,
+    pb: &ProgressBar,
+) -> anyhow::Result<()> {
     match permanent {
         true => match recursive {
             true => fs::remove_dir_all(file)?,
@@ -79,9 +85,7 @@ pub fn trash(file: &str, recursive: bool, force: bool, permanent: bool, pb: &Pro
             match compress(file, &path, pb) {
                 Ok(_) => {
                     let rt = tokio::runtime::Runtime::new().unwrap();
-                    let permit = rt.block_on(async {
-                        META_SEMAPHORE.acquire().await.unwrap()
-                    });
+                    let permit = rt.block_on(async { META_SEMAPHORE.acquire().await.unwrap() });
                     let mut meta = crate::models::load_metadata();
                     meta.push(crate::models::Entry {
                         id: id.to_string(),
@@ -92,7 +96,7 @@ pub fn trash(file: &str, recursive: bool, force: bool, permanent: bool, pb: &Pro
                     });
                     let _ = crate::models::save_metadata(meta);
                     drop(permit);
-                },
+                }
                 Err(e) => match force {
                     true => (),
                     false => return Err(e),

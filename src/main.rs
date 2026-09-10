@@ -1,8 +1,14 @@
 use anyhow::bail;
 use clap::Parser;
-use indicatif::{MultiProgress, ProgressStyle, ProgressBar, ProgressState};
+use indicatif::{MultiProgress, ProgressBar, ProgressState, ProgressStyle};
 use rayon::prelude::*;
-use std::{fs, process, path::{Path, PathBuf}, io::Write, time::Duration};
+use std::{
+    fs,
+    io::Write,
+    path::{Path, PathBuf},
+    process,
+    time::Duration,
+};
 
 mod models;
 mod trash;
@@ -58,8 +64,9 @@ fn main() -> anyhow::Result<()> {
         eprintln!("No files provided");
         process::exit(1);
     } else {
-        cli.files.par_iter().for_each(|file| {
-            match fs::canonicalize(file) {
+        cli.files
+            .par_iter()
+            .for_each(|file| match fs::canonicalize(file) {
                 Ok(file) => {
                     let file = file.to_str().map(|s| s.to_string()).unwrap();
                     let pb = mp.add(ProgressBar::new(0));
@@ -75,13 +82,12 @@ fn main() -> anyhow::Result<()> {
                         Ok(_) => pb.finish_with_message(format!("{} <done>", file.clone())),
                         Err(e) => pb.finish_with_message(e.to_string()),
                     };
-                },
+                }
                 Err(_) => {
                     eprintln!("File {file} does not exist or is inaccessible");
                     process::exit(1);
                 }
-            }
-        });
+            });
     };
 
     Ok(())

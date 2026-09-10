@@ -1,13 +1,13 @@
-use std::{fs, path::Path};
 use serde::{Deserialize, Serialize};
+use std::{fs, path::Path};
 
 #[derive(Deserialize, Serialize)]
 pub struct Entry {
     pub id: String,
     pub original_path: String,
-	pub stored_name: String,
-	pub deleted_at: u128,
-	pub is_dir: bool,
+    pub stored_name: String,
+    pub deleted_at: u128,
+    pub is_dir: bool,
 }
 
 pub fn rubbish_path() -> String {
@@ -32,7 +32,7 @@ pub fn save_metadata(data: Vec<Entry>) -> bool {
                 let _ = fs::create_dir_all(parent);
             }
             fs::write(&path, json).is_ok()
-        },
+        }
         Err(_) => false,
     }
 }
