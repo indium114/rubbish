@@ -9,6 +9,7 @@ use std::{
     process,
     time::Duration,
 };
+use tabled::Table;
 
 mod models;
 mod trash;
@@ -53,7 +54,8 @@ fn main() -> anyhow::Result<()> {
     let mp = MultiProgress::new();
 
     let _ = if cli.list {
-        todo!()
+        let meta = crate::models::load_metadata();
+        println!("{}", Table::new(meta).to_string());
     } else if let Some(id) = &cli.restore {
         todo!()
     } else if let Some(id) = &cli.delete {

@@ -1,7 +1,8 @@
 use serde::{Deserialize, Serialize};
 use std::{fs, path::Path};
+use tabled::Tabled;
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Tabled)]
 pub struct Entry {
     pub id: String,
     pub original_path: String,

@@ -9,14 +9,14 @@
   {
     "name": "force flag",
     "prio": 1,
-    "state": 0,
+    "state": 2,
     "id": 1,
     "project": "cli"
   },
   {
     "name": "list command",
     "prio": 1,
-    "state": 0,
+    "state": 2,
     "id": 2,
     "project": "cli"
   },
