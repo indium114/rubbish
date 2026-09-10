@@ -12,6 +12,7 @@ use std::{
 use tabled::Table;
 
 mod models;
+mod clear;
 mod trash;
 
 static VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -61,7 +62,7 @@ fn main() -> anyhow::Result<()> {
     } else if let Some(id) = &cli.delete {
         todo!()
     } else if cli.clear {
-        todo!()
+        crate::clear::clear();
     } else if cli.files.is_empty() {
         eprintln!("No files provided");
         process::exit(1);
